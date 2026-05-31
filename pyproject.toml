@@ -1,0 +1,68 @@
+[project]
+name = "zotero-marker"
+version = "0.1.0"
+description = "Resolve arXiv preprints in Zotero to their real venue + ranking (CORE/CCF) + citation count, and write them back as proper metadata so IF/分区 plugins light up."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["zotero", "arxiv", "bibliography", "semantic-scholar", "dblp", "ccf", "core-ranking", "research-tools"]
+authors = [{ name = "zotero-marker contributors" }]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Text Processing :: General",
+]
+dependencies = [
+    "requests>=2.31",
+]
+
+[project.optional-dependencies]
+# Enable the local web UI with:  uv sync --extra web
+web = [
+    "fastapi>=0.110",
+    "uvicorn>=0.27",
+]
+
+[project.urls]
+Homepage = "https://github.com/lelelelelelelelelelelele/zotero-marker"
+Repository = "https://github.com/lelelelelelelelelelelele/zotero-marker"
+Issues = "https://github.com/lelelelelelelelelelelele/zotero-marker/issues"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+    "fastapi>=0.110",   # so the test suite can exercise the optional web UI
+    "httpx>=0.27",      # fastapi TestClient transport
+]
+
+# App, not a distributable library: don't build/install zotero_marker as a package —
+# run.py imports it from the working tree. uv just manages the venv + locked deps.
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4"]
+ignore = ["E501"]  # don't reflow long evidence strings / comments
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+pythonpath = ["."]   # app-mode: put the project root on sys.path so `import zotero_marker` works
+filterwarnings = [
+    # third-party: starlette's TestClient nags about httpx2; not our concern
+    "ignore:Using .httpx. with .starlette.testclient. is deprecated:",
+]

@@ -1,0 +1,36 @@
+canonical,kind,core_tier,aliases
+NeurIPS,conference,A*,neurips|nips|neural information processing systems|advances in neural information processing systems
+ICML,conference,A*,icml|international conference on machine learning
+ICLR,conference,A*,iclr|international conference on learning representations
+CVPR,conference,A*,cvpr|computer vision and pattern recognition|ieee/cvf conference on computer vision and pattern recognition
+ICCV,conference,A*,iccv|international conference on computer vision
+ECCV,conference,A*,eccv|european conference on computer vision
+AAAI,conference,A*,aaai|association for the advancement of artificial intelligence
+IJCAI,conference,A*,ijcai|international joint conference on artificial intelligence
+ACL,conference,A*,annual meeting of the association for computational linguistics|association for computational linguistics
+EMNLP,conference,A*,emnlp|empirical methods in natural language processing
+NAACL,conference,A,naacl|north american chapter of the association for computational linguistics
+COLT,conference,A*,colt|conference on learning theory|computational learning theory
+UAI,conference,A,uai|uncertainty in artificial intelligence
+AISTATS,conference,A,aistats|artificial intelligence and statistics
+KDD,conference,A*,kdd|knowledge discovery and data mining
+SIGIR,conference,A*,sigir|research and development in information retrieval
+WWW,conference,A*,the web conference|world wide web conference
+WACV,conference,A,wacv|winter conference on applications of computer vision
+ACM MM,conference,A*,acm multimedia|acm international conference on multimedia
+ICRA,conference,A,icra|international conference on robotics and automation
+IROS,conference,A,iros|intelligent robots and systems
+SIGGRAPH,conference,A*,siggraph
+JMLR,journal,,jmlr|journal of machine learning research
+TPAMI,journal,,tpami|transactions on pattern analysis and machine intelligence
+TMLR,journal,,tmlr|transactions on machine learning research
+TACL,journal,,tacl|transactions of the association for computational linguistics
+IJCV,journal,,ijcv|international journal of computer vision
+Nature,journal,,nature
+Nature Machine Intelligence,journal,,nature machine intelligence
+Science,journal,,science
+CACM,journal,,communications of the acm
+USENIX Security,conference,A*,usenix security
+ACM Computing Surveys,journal,,acm computing surveys|csur
+JASA,journal,,journal of the american statistical association
+TKDE,journal,,transactions on knowledge and data engineering

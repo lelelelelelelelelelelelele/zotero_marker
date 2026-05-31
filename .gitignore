@@ -1,0 +1,14 @@
+.env
+__pycache__/
+*.pyc
+out/
+out_smoketest/
+.venv/
+
+# session scratch / generated artifacts (not part of the project)
+_repo.json
+
+# developer / architecture docs — kept LOCAL, not published.
+# (architecture blueprint + render.py, the BLUEPRINT, the dev report, scratch feedback)
+docs/
+BLUEPRINT.md
