@@ -29,3 +29,14 @@ def test_csv_has_header_and_row(tmp_path, make_resolution):
     text = csv_p.read_text(encoding="utf-8-sig")
     assert "item_key" in text.splitlines()[0]
     assert "ZZZ" in text
+
+
+def test_report_surfaces_collections(tmp_path, make_resolution):
+    r = make_resolution(item_key="K1", collections=["Long-Term Alignment"])
+    csv_p, _, html_p = report.write_reports([r], tmp_path)
+    csv_text = csv_p.read_text(encoding="utf-8-sig")
+    assert "collections" in csv_text.splitlines()[0]      # CSV column added
+    assert "Long-Term Alignment" in csv_text
+    html = html_p.read_text(encoding="utf-8")
+    assert "Long-Term Alignment" in html                  # collection filter + cell
+    assert "可写入" in html                                # new will-write chip

@@ -28,6 +28,10 @@ def _table() -> list[dict]:
                 "kind": (r.get("kind") or "conference").strip(),
                 "core": (r.get("core_tier") or "").strip(),
                 "aliases": aliases,
+                # Exact string to WRITE when S2's venue name differs from easyScholar's
+                # match value (e.g. S2 'IEEE International Conference on Computer Vision'
+                # vs easyScholar's prefix-less ICCV). Empty -> use the resolved name.
+                "write_as": (r.get("write_as") or "").strip(),
             })
     return rows
 

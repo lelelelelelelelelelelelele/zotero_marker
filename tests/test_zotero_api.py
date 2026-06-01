@@ -57,3 +57,16 @@ def test_ping_false_on_request_error():
     c = _client()
     c.s.get.side_effect = requests.RequestException("boom")
     assert c.ping() is False
+
+
+def test_get_collections_builds_parent_paths():
+    c = _client()
+    resp = MagicMock()
+    resp.json.return_value = [
+        {"key": "AAA", "data": {"name": "Parent", "parentCollection": False}},
+        {"key": "BBB", "data": {"name": "Child", "parentCollection": "AAA"}},
+        {"key": "CCC", "data": {"name": "Solo", "parentCollection": False}},
+    ]
+    c.s.get.return_value = resp
+    assert c.get_collections() == {
+        "AAA": "Parent", "BBB": "Parent / Child", "CCC": "Solo"}

@@ -5,11 +5,15 @@
 ![lint](https://img.shields.io/badge/lint-ruff-261230)
 ![tests](https://img.shields.io/badge/tests-pytest-0a9edc)
 
+[English](README.md) | [中文](README_zh.md)
+
+![zotero-marker before, review console, and after](assets/zotero-story.webp)
+
 Resolve the **real publication venue** of the arXiv preprints sitting in your Zotero
-library, then write it back as proper metadata — so impact-factor / 分区 / CCF plugins
-(easyScholar, [zotero-style](https://github.com/MuiseDestiny/zotero-style) / Ethereal
-Style) and citation-count columns ([Citation Tally](https://github.com/daeh/zotero-citation-tally))
-light up natively.
+library, then write it back as proper metadata — so impact-factor / journal-quartile / CCF
+plugins (easyScholar, [zotero-style](https://github.com/MuiseDestiny/zotero-style) /
+Ethereal Style) and citation-count columns
+([Citation Tally](https://github.com/daeh/zotero-citation-tally)) light up natively.
 
 A `preprint` in Zotero has no venue field, so those plugins show nothing for it. They read
 the **venue field** (`publicationTitle` for journals; `proceedingsTitle`/`conferenceName`
@@ -18,14 +22,21 @@ zotero-marker **converts the itemType** and fills the venue + identifiers, keepi
 id and citation count in `Extra`.
 
 It is deliberately **deterministic-first**: venues are resolved for free via Semantic
-Scholar (keyed on the arXiv id) and DBLP, with ~zero hallucination. An LLM + web-search
-fallback is left as a stub (`resolvers.resolve_llm`) for the hard residual only.
+Scholar (keyed on the arXiv id) and DBLP, with ~zero hallucination. Hard cases are left for
+review instead of guessed.
 
 > **Why not the existing arXiv plugins?** They merge on the *published DOI* the author
 > registered on the arXiv page. NeurIPS / ICLR / older CVPR have **no Crossref DOI** (they
 > live on proceedings sites / OpenReview), so DOI-first tools miss exactly the famous
 > papers. Keying on the **arXiv id → Semantic Scholar** (which dedupes preprint + published
 > into one record) fixes that.
+
+<details>
+<summary>Animated walkthrough</summary>
+
+![demo](assets/demo.gif)
+
+</details>
 
 ## Install
 
@@ -57,7 +68,7 @@ uv run python run.py resolve --items GD5PM7VD,BW3RIHJ2   # specific items
 This produces `out/resolutions.csv`, `out/resolutions.json`, and **`out/resolutions.html`** —
 a self-contained review console: sortable/filterable table of every item, the exact field
 changes that will be written, citations, and evidence links. Tick the rows you want and
-click **复制选中的 keys**.
+copy the selected item keys.
 
 **2. Write (converts itemType + fills venue fields):**
 
@@ -81,35 +92,61 @@ uv run python run.py web        # serves http://127.0.0.1:8000
 
 Bound to `127.0.0.1` only; the write action needs `ZOTERO_API_KEY` and an explicit confirm.
 
-## The payoff — what shows up in Zotero
+![web review console](assets/zotero-review.webp)
 
-After writing, your community plugins recognise the venue and citation count:
+*Filter by Zotero collection, see the exact fields each row will write, then tick and write. Low-confidence rows (e.g. the 0.60 workshop matches) are left unchecked — the tool abstains rather than guess.*
 
-- **Venue / IF / 分区 / CCF** — via **easyScholar + zotero-style**. easyScholar matches by
-  the venue string we wrote, so CCF-listed venues (NeurIPS, CVPR, …) get their tag, and
-  journals get their impact factor.
-- **Citation count column** — via **Citation Tally**. We write the citation line in its exact
-  format `Citations: <N> (SemanticScholar) [date]`, and Semantic Scholar is on by default in
-  its database order, so the count appears with no re-fetch.
+## What gets written, and how plugins integrate
 
-### Honest limitations
+zotero-marker does not replace easyScholar, zotero-style, or Citation Tally. It fills the
+Zotero fields those plugins already know how to read.
 
-- **Impact factor is journal-only** — conference papers (ICLR, NeurIPS) correctly show no IF.
-- **ICLR's CCF tag may not appear** — CCF added ICLR only in its 2026 (7th) edition, which
-  easyScholar's dataset still lags; add it via an easyScholar custom dataset if you need it.
-- **arXiv-only / workshop papers stay `unknown`** — if a paper was never formally published
-  (or only as a workshop paper), there's no venue to resolve, even with thousands of citations.
+On write, it mainly changes/adds:
+
+- **Item type** — converts `preprint` into `conferencePaper` or `journalArticle`.
+- **Venue fields** — conferences get `proceedingsTitle` and `conferenceName`; journals get
+  `publicationTitle`, plus `journalAbbreviation` and `ISSN` when available.
+- **Identifiers and `Extra`** — preserves `arXiv:<id>`; writes `DOI` when a real published
+  DOI is available; writes citation count to `Extra` in Citation Tally's readable format:
+  `Citations: <N> (SemanticScholar) [date]`.
+
+Those fields then plug into the existing ecosystem:
+
+- **easyScholar + zotero-style** keep matching IF, journal-quartile, CCF, and related
+  metadata from the venue name and DOI.
+- **Citation Tally** keeps reading citation counts from `Extra`; make sure its database
+  order includes Semantic Scholar so it recognizes the `Citations:` line above.
+
+## Limitations and tradeoffs
+
+- **Venue-name mapping is not exhaustive** — Semantic Scholar / DBLP venue names do not
+  always match the exact strings easyScholar uses. This project uses `write_as` in
+  `data/venue_rankings.csv` for common top venues, but it is not a complete knowledge base;
+  long-tail venues may need an added mapping or a manual `data/overrides.csv` entry.
+- **Citation counts are snapshots** — the tool writes the Semantic Scholar citation count
+  seen during resolution into `Extra`, but there is no `refresh` mode yet for already-written
+  items, so the count is not live.
+- **Write-back needs external API keys** — the project itself is open source and free; DBLP
+  and the Zotero local API need no key. Writing to Zotero requires a write-scoped
+  `ZOTERO_API_KEY`, and heavier Semantic Scholar usage should set `S2_API_KEY` to avoid rate
+  limits.
+- **It is not a native Zotero plugin** — today it is a CLI / local web UI, so it has one more
+  step than a right-click plugin. The upside is that the resolver is less exposed to Zotero
+  plugin API churn.
 
 ## How confidence is computed
 
 Rule-based, **not** an LLM's self-reported number:
 
-| confidence | meaning |
-|---|---|
-| 0.95 | ≥2 independent sources (S2 + DBLP) agree on a known venue |
-| 0.85 | one source, venue recognized in the ranking table |
-| 0.60 | a venue string was found, but it's not in the ranking table |
-| 0.00 | no venue found → `acceptance=unknown` |
+| confidence | meaning | written by default? |
+|---|---|---|
+| 0.95 | ≥2 independent sources (S2 + DBLP) agree on a known venue | ✓ |
+| 0.85 | one source, venue recognized in the ranking table | ✓ |
+| 0.60 | a venue string was found, but it's not in the ranking table | ✗ |
+| 0.00 | no venue found → `acceptance=unknown` | ✗ |
+
+`write` only applies items at or above `--threshold` (default `0.85`). Lower it
+(`--threshold 0.6`) to include shakier matches, or raise it to be stricter.
 
 ## Ranking table & overrides
 
@@ -149,36 +186,25 @@ each write is guarded by the item's resolve-time version (a 412 aborts rather th
 overwrite your newer edits). Nothing is written until you review and pick it. Separately,
 `resolve` *flags* duplicate arXiv ids already in your library so you can merge them.
 
-**What do the confidence numbers mean?**
-
-| confidence | meaning | written by default? |
-|---|---|---|
-| 0.95 | two independent sources (S2 + DBLP) agree on a known venue | ✓ |
-| 0.85 | one source, venue recognized in the ranking table | ✓ |
-| 0.60 | a venue string was found, but it isn't in the ranking table | ✗ |
-| 0.00 | no venue found → `unknown` | ✗ |
-
-`write` only applies items at or above `--threshold` (default `0.85`). Lower it
-(`--threshold 0.6`) to include shakier matches, or raise it to be stricter. The score is a
-rule (how many databases agree), not a model's self-reported guess.
-
 **Why does a conference paper show no impact factor?**
-Impact factor is a journal-only metric (JCR). Conferences are ranked by CORE / CCF, not IF
-— so a blank IF on a conference paper is correct, not a bug.
+Impact factor is a journal/JCR metric. Conferences are ranked through systems such as CORE
+and CCF, so a blank IF on a conference paper is expected.
 
 **Why doesn't my ICLR paper get a CCF tag?**
-CCF only added ICLR in its 2026 (7th) edition, which easyScholar's dataset still lags.
-That's a data-source delay on easyScholar's side, not something this tool controls.
+CCF added ICLR in its 2026 (7th) edition. If easyScholar has not synced that dataset yet,
+Zotero will not display the tag even when this tool writes `ICLR` correctly. Add a custom
+easyScholar dataset entry if you need the tag immediately.
 
 **Why is a paper with thousands of citations marked `unknown`?**
-Because it was never formally published — arXiv-only or workshop-only papers (e.g. *Scaling
-Laws for Neural Language Models*) have no venue to resolve, however many citations they have.
+Because citation count and publication venue are separate facts. arXiv-only or workshop-only
+papers can be highly cited, but if there is no formal conference/journal publication, there is
+no canonical venue for this tool to write back.
 
 **Why a CLI and not a Zotero plugin?**
 Zotero now ships a major version roughly every 8 weeks, and plugins break on each bump
 (JSM→ESM, bootstrap changes, `strict_max_version`). The resolution logic is far more
 durable as a Python CLI on stable APIs. A thin Zotero plugin that *calls* this resolver is
-a sensible later layer (see the Roadmap) — but the brain stays decoupled from Zotero's churn.
+a sensible later layer, while the resolver stays decoupled from Zotero's churn.
 
 ## Development
 
@@ -190,22 +216,14 @@ uv run ruff check .        # lint
 CI (GitHub Actions) runs ruff + pytest on Python 3.10–3.13. See
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Roadmap
+## Future work
 
-The deterministic cascade handles the bulk for free, with ~zero hallucination. Planned
-next steps:
-
-- **Citation refresh (`refresh` mode)** — the tool really has two jobs: *preprint match*
-  (incremental — `resolve` / `write` resolve the as-yet-unmatched preprints) and *citation
-  update* (a full sweep that re-fetches citation counts for already-matched items by arXiv id
-  and rewrites only the `Citations:` line + date, leaving venue/type untouched). The second
-  is **not built yet** — once an item is written it leaves the preprint scan, so its count
-  freezes; the dated `Extra` stamp is the hook a `refresh` mode would use.
-- **LLM + web-search fallback** for the residual that Semantic Scholar and DBLP both
-  miss — fuse OpenReview / CVF Open Access / author pages to read "Accepted at NeurIPS
-  2024"-style evidence, with forced abstention and snippet-constrained evidence URLs.
-- **Expose the resolver as an MCP server** so other clients (editors, agents) can use it.
-- **A thin Zotero plugin** that calls the resolver from a right-click menu.
+- **Citation refresh** — update the `Citations:` line in `Extra` for items that were already
+  written.
+- **Harder venue cases** — add reviewable web evidence when Semantic Scholar and DBLP both
+  miss.
+- **Zotero plugin entry point** — provide a more native Zotero workflow while reusing the
+  same resolver.
 
 ## Layout
 
@@ -215,7 +233,7 @@ pyproject.toml              uv project + ruff/pytest config
 zotero_marker/
   config.py                 .env loading + settings
   util.py                   arXiv-id extraction + title matching
-  resolvers.py              Semantic Scholar (batch by arXiv id) + DBLP + LLM stub
+  resolvers.py              Semantic Scholar (batch by arXiv id) + DBLP resolvers
   rankings.py               venue string -> canonical + CORE tier
   overrides.py              manual per-arXiv overrides
   pipeline.py               resolve cascade, venue choice, confidence, tags, dup detection

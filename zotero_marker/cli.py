@@ -45,6 +45,13 @@ def cmd_resolve(args) -> int:
     items = _gather(zot, items_filter, args.limit)
     print(f"Candidates: {len(items)} preprint item(s)")
 
+    try:  # collection labels are a nice-to-have for the review UIs, never fatal
+        cmap = zot.get_collections()
+    except Exception:  # noqa: BLE001
+        cmap = {}
+    if cmap:
+        print(f"Collections: {len(cmap)} (items will be labelled by collection)")
+
     s2 = SemanticScholar()
     dblp = DBLP()
     print(f"Semantic Scholar key: {'yes' if s2.has_key else 'NO (using DBLP + rate-limited S2)'}")
@@ -58,7 +65,7 @@ def cmd_resolve(args) -> int:
               f"cite={res.citation_count if res.citation_count is not None else '-'}  "
               f"{res.title[:48]}")
 
-    results = resolve_items(items, s2, dblp, progress=progress)
+    results = resolve_items(items, s2, dblp, progress=progress, collections_map=cmap)
     csv_path, json_path, html_path = write_reports(results, args.out_path)
 
     accepted = [r for r in results if r.acceptance == "accepted"]

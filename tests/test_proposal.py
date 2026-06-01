@@ -110,6 +110,13 @@ class TestFullName:
         assert proposal._full_name("ICLR", "International Conference on Learning Representations") \
             == "International Conference on Learning Representations"
 
+    def test_write_as_pins_easyscholar_matching_name(self):
+        # Regression: S2 returns ICCV as "IEEE International Conference on Computer Vision",
+        # but easyScholar's ICCV (CCF A) entry has no "IEEE" prefix — so S2's string left
+        # the CCF tag blank. `write_as` pins the prefix-less string easyScholar matches.
+        assert proposal._full_name("ICCV", "IEEE International Conference on Computer Vision") \
+            == "International Conference on Computer Vision"
+
 
 class TestBuildSkips:
     def test_unknown_returns_empty(self, make_resolution):

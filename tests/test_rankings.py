@@ -69,3 +69,9 @@ def test_accepts_acronym_followed_by_year():
 def test_accepts_generic_venue_suffix():
     # "Symposium" is part of the official name, not a distinct venue
     assert rankings.lookup("USENIX Security Symposium")["canonical"] == "USENIX Security"
+
+
+def test_write_as_column():
+    # Optional column: the exact string to write when S2's name != easyScholar's match value.
+    assert rankings.lookup("ICCV")["write_as"] == "International Conference on Computer Vision"
+    assert rankings.lookup("ICLR")["write_as"] == ""        # default empty when unset

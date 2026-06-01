@@ -55,10 +55,20 @@ def _smart_title(s: str) -> str:
 
 
 def _full_name(canonical: str | None, raw: str | None) -> str:
-    """Full venue name to write (easyScholar matches the full string best)."""
+    """Full venue name to write (easyScholar matches on the full venue string).
+
+    Semantic Scholar's venue name and easyScholar's match value can differ — e.g. S2
+    returns 'IEEE International Conference on Computer Vision', but easyScholar's ICCV
+    (CCF A) entry has no 'IEEE' prefix, so writing S2's string leaves the CCF tag blank.
+    `write_as` in venue_rankings.csv pins the exact easyScholar-matching string for such
+    venues (decoupled from the lookup aliases). Otherwise S2's multi-word raw is already
+    the full name; single-token raws fall back to the longest table alias.
+    """
+    row = rankings.lookup(canonical or raw or "")
+    if row and row.get("write_as"):
+        return row["write_as"]                 # S2 name != easyScholar match value
     if raw and len(raw.split()) >= 2:          # S2 'venue_raw' is already the full name
         return raw
-    row = rankings.lookup(canonical or raw or "")
     if row:
         longest = max([row["canonical"], *row["aliases"]], key=len)
         if len(longest.split()) >= 2:

@@ -161,3 +161,20 @@ class TestResolveItems:
         # the venue string actually written (what easyScholar reads) must be correctly cased
         assert res.fields["proceedingsTitle"] == "International Conference on Machine Learning"
         assert res.fields["conferenceName"] == res.fields["proceedingsTitle"]
+
+    def test_labels_collections_from_map(self, make_item):
+        item = make_item(key="K", title="X", archiveID="arXiv:2106.00001",
+                         collections=["AAA", "BBB"])
+        s2 = _FakeS2({"2106.00001": VenueHit(
+            source="semantic_scholar", venue_raw="ICLR", year=2021,
+            venue_type="conference", citation_count=1)})
+        [res] = resolve_items([item], s2, _FakeDBLP(),
+                              collections_map={"AAA": "Foo", "BBB": "Bar / Baz"})
+        assert res.collections == ["Foo", "Bar / Baz"]
+
+    def test_collections_fall_back_to_keys_without_map(self, make_item):
+        item = make_item(key="K", title="X", archiveID="arXiv:2106.00002",
+                         collections=["ZZZ"])
+        s2 = _FakeS2({"2106.00002": VenueHit(source="semantic_scholar", venue_raw=None)})
+        [res] = resolve_items([item], s2, _FakeDBLP())
+        assert res.collections == ["ZZZ"]

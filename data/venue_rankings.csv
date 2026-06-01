@@ -1,9 +1,9 @@
-canonical,kind,core_tier,aliases
+canonical,kind,core_tier,aliases,write_as
 NeurIPS,conference,A*,neurips|nips|neural information processing systems|advances in neural information processing systems
 ICML,conference,A*,icml|international conference on machine learning
 ICLR,conference,A*,iclr|international conference on learning representations
 CVPR,conference,A*,cvpr|computer vision and pattern recognition|ieee/cvf conference on computer vision and pattern recognition
-ICCV,conference,A*,iccv|international conference on computer vision
+ICCV,conference,A*,iccv|international conference on computer vision,International Conference on Computer Vision
 ECCV,conference,A*,eccv|european conference on computer vision
 AAAI,conference,A*,aaai|association for the advancement of artificial intelligence
 IJCAI,conference,A*,ijcai|international joint conference on artificial intelligence

@@ -24,5 +24,9 @@ uv run ruff check .     # lint
 
 ## Reporting issues
 
-Include the item's arXiv id, what venue/tier you expected, and what the tool resolved
-(the `resolve` HTML console shows the evidence links it used).
+For venue or ranking mismatches, please include:
+
+- the item's arXiv id;
+- the venue/tier you expected;
+- the venue/tier zotero-marker resolved;
+- the evidence links shown in `out/resolutions.html`, or a screenshot of that row.

@@ -53,6 +53,37 @@ class ZoteroClient:
         r.raise_for_status()
         return r.json()
 
+    def get_collections(self) -> dict:
+        """Map every collection key -> its display path ("Parent / Child").
+
+        Lets us label each item by which Zotero collection(s) it lives in, so the
+        review UIs can filter by collection. Read-only; paginated like iter_items.
+        """
+        raw: dict[str, tuple[str, str | None]] = {}
+        start = 0
+        while True:
+            r = self.s.get(f"{self._prefix}/collections",
+                           params={"limit": 100, "start": start, "format": "json"},
+                           timeout=self.timeout)
+            r.raise_for_status()
+            batch = r.json()
+            if not batch:
+                break
+            for c in batch:
+                d = c.get("data", {})
+                raw[c["key"]] = (d.get("name", ""), d.get("parentCollection") or None)
+            if len(batch) < 100:
+                break
+            start += 100
+
+        def path(key: str, seen: tuple = ()) -> str:
+            name, parent = raw.get(key, ("", None))
+            if parent and parent in raw and parent not in seen:
+                return f"{path(parent, seen + (key,))} / {name}"
+            return name
+
+        return {k: path(k) for k in raw}
+
     def patch_tags(self, key: str, version: int, tags: list[dict]) -> requests.Response:
         """Replace the item's tag list (caller must pass the full, merged list)."""
         return self._patch(key, version, {"tags": tags})

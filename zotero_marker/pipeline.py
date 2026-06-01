@@ -26,6 +26,7 @@ class Resolution:
     evidence: list[str] = field(default_factory=list)
     suggested_tags: list[str] = field(default_factory=list)
     existing_tags: list[str] = field(default_factory=list)
+    collections: list[str] = field(default_factory=list)   # Zotero collection display paths
     # write-back proposal (field-writing strategy)
     current_item_type: str = "preprint"
     target_item_type: str | None = None
@@ -119,8 +120,13 @@ def duplicate_arxiv_groups(results: list[Resolution]) -> dict[str, list[str]]:
 
 
 def resolve_items(items: list[dict], s2: SemanticScholar, dblp: DBLP,
-                  progress=None) -> list[Resolution]:
-    """items = raw Zotero item dicts. Deterministic cascade: S2 (batch) -> DBLP (residual)."""
+                  progress=None, collections_map: dict | None = None) -> list[Resolution]:
+    """items = raw Zotero item dicts. Deterministic cascade: S2 (batch) -> DBLP (residual).
+
+    collections_map (key -> display path, from ZoteroClient.get_collections) labels each
+    item with its Zotero collection(s) so the review UIs can filter by collection.
+    """
+    cmap = collections_map or {}
     # 1) extract arxiv ids and batch-resolve via Semantic Scholar
     arxiv_of = {it["key"]: util.extract_arxiv_id(it["data"]) for it in items}
     ids = sorted({a for a in arxiv_of.values() if a})
@@ -173,6 +179,7 @@ def resolve_items(items: list[dict], s2: SemanticScholar, dblp: DBLP,
             evidence=[f"{h.source}: {h.venue_raw or '-'} ({h.evidence_url or ''})"
                       for h in hits],
             existing_tags=[t.get("tag", "") for t in data.get("tags", []) or []],
+            collections=[cmap.get(k, k) for k in data.get("collections", []) or []],
             current_item_type=data.get("itemType", "preprint"),
         )
         res.suggested_tags = build_tags(res)

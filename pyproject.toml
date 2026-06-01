@@ -33,9 +33,9 @@ web = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/lelelelelelelelelelelele/zotero-marker"
-Repository = "https://github.com/lelelelelelelelelelelele/zotero-marker"
-Issues = "https://github.com/lelelelelelelelelelelele/zotero-marker/issues"
+Homepage = "https://github.com/lelelelelelelelelelelelele/zotero_marker"
+Repository = "https://github.com/lelelelelelelelelelelelele/zotero_marker"
+Issues = "https://github.com/lelelelelelelelelelelelele/zotero_marker/issues"
 
 [dependency-groups]
 dev = [

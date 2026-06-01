@@ -6,6 +6,15 @@ All notable changes are documented here. Format based on
 
 ## [Unreleased]
 
+### Fixed
+- ICCV items got no easyScholar CCF tag. Semantic Scholar returns the venue as
+  `IEEE International Conference on Computer Vision`, but easyScholar's ICCV (CCF A) entry
+  has no `IEEE` prefix — so the venue string written didn't match and the tag stayed blank
+  (venue + citation count were unaffected). Added an optional `write_as` column to
+  `data/venue_rankings.csv` that pins the exact easyScholar-matching string to write,
+  decoupled from the lookup aliases; ICCV now writes `International Conference on Computer
+  Vision`. CVPR/ECCV were already correct (S2 returns their prefix-less names).
+
 ## [0.1.0] — 2026-05-31
 
 ### Added
