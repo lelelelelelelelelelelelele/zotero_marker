@@ -72,6 +72,14 @@ function itemToData(item) {
     tags,
     collections,
     itemType: Zotero.ItemTypes.getName(item.itemTypeID),
+    // existing venue fields — needed so buildProposal's idempotency check can see that an
+    // item is ALREADY resolved (else already-converted items get re-proposed every run).
+    proceedingsTitle: field(item, "proceedingsTitle"),
+    conferenceName: field(item, "conferenceName"),
+    publicationTitle: field(item, "publicationTitle"),
+    journalAbbreviation: field(item, "journalAbbreviation"),
+    ISSN: field(item, "ISSN"),
+    publisher: field(item, "publisher"),
   };
 }
 
@@ -308,6 +316,28 @@ function removeFromMenu(window) {
 // ----- preferences pane wiring (manual, no auto-binding magic) -----------------------
 function onPrefsLoad({ window }) {
   const doc = window.document;
+  const setText = (id, v) => {
+    const el = doc.getElementById(id);
+    if (el) el.textContent = v;
+  };
+  const setAttr = (id, a, v) => {
+    const el = doc.getElementById(id);
+    if (el) el.setAttribute(a, v);
+  };
+  // English is the xhtml default; localize to Chinese on zh locales (before values are set,
+  // so the menulist shows the localized label for the current selection).
+  if (ZH) {
+    setText("zm-s2desc", "Semantic Scholar API key(可选)——留空即用免费公共端点。只有大批量解析撞到限流时才需要填。");
+    setAttr("zm-s2label", "value", "S2 API key:");
+    setAttr("zm-pref-s2key", "placeholder", "(留空 = 公共端点)");
+    setText("zm-confdesc", "审核台里,置信达到此值的条目默认勾选;低于此值的仍会列出,但留给你决定。");
+    setAttr("zm-conflabel", "value", "自动勾选 ≥");
+    setAttr("zm-c06", "label", "0.60(含未识别的 venue 字符串)");
+    setAttr("zm-c08", "label", "0.80(推荐)");
+    setAttr("zm-c085", "label", "0.85(单一可信来源)");
+    setAttr("zm-c095", "label", "0.95(两个来源一致)");
+  }
+
   const key = doc.getElementById("zm-pref-s2key");
   if (key) {
     key.value = Zotero.Prefs.get("zoteromarker.s2ApiKey") || "";
