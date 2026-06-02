@@ -28,5 +28,5 @@ For venue or ranking mismatches, please include:
 
 - the item's arXiv id;
 - the venue/tier you expected;
-- the venue/tier zotero-marker resolved;
+- the venue/tier arxiv-marker resolved;
 - the evidence links shown in `out/resolutions.html`, or a screenshot of that row.

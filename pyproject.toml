@@ -1,5 +1,5 @@
 [project]
-name = "zotero-marker"
+name = "arxiv-marker"
 version = "0.1.0"
 description = "Resolve arXiv preprints in Zotero to their real venue + ranking (CORE/CCF) + citation count, and write them back as proper metadata so IF/分区 plugins light up."
 readme = "README.md"
@@ -7,7 +7,7 @@ requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
 keywords = ["zotero", "arxiv", "bibliography", "semantic-scholar", "dblp", "ccf", "core-ranking", "research-tools"]
-authors = [{ name = "zotero-marker contributors" }]
+authors = [{ name = "arxiv-marker contributors" }]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
@@ -33,9 +33,9 @@ web = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/lelelelelelelelelelelelele/zotero_marker"
-Repository = "https://github.com/lelelelelelelelelelelelele/zotero_marker"
-Issues = "https://github.com/lelelelelelelelelelelelele/zotero_marker/issues"
+Homepage = "https://github.com/lelelelelelelelelelelelele/arxiv-marker"
+Repository = "https://github.com/lelelelelelelelelelelelele/arxiv-marker"
+Issues = "https://github.com/lelelelelelelelelelelelele/arxiv-marker/issues"
 
 [dependency-groups]
 dev = [
@@ -45,7 +45,7 @@ dev = [
     "httpx>=0.27",      # fastapi TestClient transport
 ]
 
-# App, not a distributable library: don't build/install zotero_marker as a package —
+# App, not a distributable library: don't build/install arxiv_marker as a package —
 # run.py imports it from the working tree. uv just manages the venv + locked deps.
 [tool.uv]
 package = false
@@ -61,7 +61,7 @@ ignore = ["E501"]  # don't reflow long evidence strings / comments
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
-pythonpath = ["."]   # app-mode: put the project root on sys.path so `import zotero_marker` works
+pythonpath = ["."]   # app-mode: put the project root on sys.path so `import arxiv_marker` works
 filterwarnings = [
     # third-party: starlette's TestClient nags about httpx2; not our concern
     "ignore:Using .httpx. with .starlette.testclient. is deprecated:",

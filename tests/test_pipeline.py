@@ -1,7 +1,7 @@
 import pytest
 
-from zotero_marker import pipeline
-from zotero_marker.pipeline import (
+from arxiv_marker import pipeline
+from arxiv_marker.pipeline import (
     _choose_venue,
     _cite_bucket,
     _confidence,
@@ -10,7 +10,7 @@ from zotero_marker.pipeline import (
     duplicate_arxiv_groups,
     resolve_items,
 )
-from zotero_marker.resolvers import VenueHit
+from arxiv_marker.resolvers import VenueHit
 
 
 class TestCiteBucket:

@@ -19,7 +19,7 @@ _TOOL_LINE = re.compile(
     r"^\s*(?:"
     r"\d+\s+citations\s*\(semantic\s*scholar\)"      # legacy: "N citations (Semantic Scholar)"
     r"|citations:\s*\d+\s*\(semanticscholar\)"        # current: "Citations: N (SemanticScholar)"
-    r"|zotero-marker:"                                 # our resolved stamp
+    r"|(?:zotero|arxiv)-marker:"                                 # our resolved stamp
     r")",
     re.I,
 )
@@ -126,7 +126,17 @@ def build(res, s2_hit, arxiv_id: str | None, data: dict) -> tuple[str | None, di
         # NOTE: the user must add Semantic Scholar to Citation Tally's database order, else
         # its column only scans for "(Crossref)" (the default) and won't find this line.
         kept.append(f"Citations: {res.citation_count} (SemanticScholar) [{today}]")
-    kept.append(f"zotero-marker: resolved {today}")
+    kept.append(f"arxiv-marker: resolved {today}")
     fields["extra"] = "\n".join(kept).strip()
+
+    # Idempotency: if the item is ALREADY the target type with its venue field already
+    # written, there's no STRUCTURAL change left to propose — return empty so the review
+    # UI shows "no change" instead of perpetually re-listing a resolved item (and
+    # auto-selecting it for a redundant re-write). Compare the venue field only, NOT
+    # extra: the citation line + dated stamp legitimately change every run, and we won't
+    # re-list an already-converted item just to refresh those.
+    venue_field = "publicationTitle" if itype == "journalArticle" else "proceedingsTitle"
+    if data.get("itemType") == itype and (data.get(venue_field) or "") == fields.get(venue_field, ""):
+        return None, {}
 
     return itype, fields

@@ -1,4 +1,4 @@
-# zotero-marker
+# arxiv-marker
 
 ![python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![license](https://img.shields.io/badge/license-MIT-green)
@@ -7,7 +7,7 @@
 
 [English](README.md) | [中文](README_zh.md)
 
-![zotero-marker before, review console, and after](assets/zotero-story.webp)
+![arxiv-marker before, review console, and after](assets/zotero-story.webp)
 
 Resolve the **real publication venue** of the arXiv preprints sitting in your Zotero
 library, then write it back as proper metadata — so impact-factor / journal-quartile / CCF
@@ -19,7 +19,7 @@ citation-count columns
 A `preprint` in Zotero has no venue field, so those plugins show nothing for it. They read
 the **venue field** (`publicationTitle` for journals; `proceedingsTitle`/`conferenceName`
 for conferences) and match easyScholar by venue name + DOI — they do **not** read tags. So
-zotero-marker **converts the itemType** and fills the venue + identifiers, keeping the arXiv
+arxiv-marker **converts the itemType** and fills the venue + identifiers, keeping the arXiv
 id and citation count in `Extra`.
 
 It is deliberately **deterministic-first**: venues are resolved for free via Semantic
@@ -99,7 +99,7 @@ Bound to `127.0.0.1` only; the write action needs `ZOTERO_API_KEY` and an explic
 
 ## What gets written, and how plugins integrate
 
-zotero-marker does not replace [easyScholar](https://www.easyscholar.cc/),
+arxiv-marker does not replace [easyScholar](https://www.easyscholar.cc/),
 [zotero-style](https://github.com/MuiseDestiny/zotero-style), or
 [Citation Tally](https://github.com/daeh/zotero-citation-tally), and is not affiliated
 with them. It fills the Zotero fields those plugins already know how to read.
@@ -174,7 +174,7 @@ Scholar key is optional (it only lifts rate limits). The tool has one runtime de
 **What is DBLP, and why use it alongside Semantic Scholar?**
 [DBLP](https://dblp.org) is a free, open computer-science bibliography (maintained by
 Schloss Dagstuhl). It has the best coverage of CS *conferences* — exactly where Crossref
-and Semantic Scholar are weakest. zotero-marker uses it as a fallback: when S2 returns no
+and Semantic Scholar are weakest. arxiv-marker uses it as a fallback: when S2 returns no
 venue, or a later journal reprint, DBLP recovers the original conference by title + author
 + year (e.g. *Generative Adversarial Networks*: S2 says CACM, DBLP finds NeurIPS 2014).
 
@@ -235,7 +235,7 @@ CI (GitHub Actions) runs ruff + pytest on Python 3.10–3.13. See
 ```
 run.py                      entry point: python run.py resolve|write|web
 pyproject.toml              uv project + ruff/pytest config
-zotero_marker/
+arxiv_marker/
   config.py                 .env loading + settings
   util.py                   arXiv-id extraction + title matching
   resolvers.py              Semantic Scholar (batch by arXiv id) + DBLP resolvers

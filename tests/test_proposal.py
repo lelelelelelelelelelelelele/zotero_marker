@@ -1,4 +1,4 @@
-from zotero_marker import proposal
+from arxiv_marker import proposal
 
 
 class TestIsArxivDoi:
@@ -25,7 +25,7 @@ class TestBuildConference:
         assert "DOI" not in fields                                  # arXiv DOI is filtered out
         assert "Citations: 19435 (SemanticScholar)" in fields["extra"]
         assert "arXiv:2106.09685" in fields["extra"]
-        assert "zotero-marker: resolved" in fields["extra"]
+        assert "arxiv-marker: resolved" in fields["extra"]
 
     def test_publisher_filled_from_map(self, make_resolution, make_hit):
         res = make_resolution(kind="conference", canonical="CVPR",
@@ -61,7 +61,7 @@ class TestExtraIdempotency:
     def test_rewrites_not_duplicates(self, make_resolution, make_hit):
         prior = ("arXiv:2106.09685 [cs]\n"
                  "Citations: 50 (SemanticScholar) [2026-01-01]\n"
-                 "zotero-marker: resolved 2026-01-01\n"
+                 "zotero-marker: resolved 2026-01-01\n"   # legacy stamp from before the rename
                  "User note: keep me")
         res = make_resolution(kind="conference", canonical="ICLR",
                               venue_raw="International Conference on Learning Representations",
@@ -71,7 +71,8 @@ class TestExtraIdempotency:
         assert extra.count("Citations:") == 1
         assert "Citations: 100 (SemanticScholar)" in extra
         assert "Citations: 50" not in extra
-        assert extra.count("zotero-marker:") == 1
+        assert extra.count("zotero-marker:") == 0       # legacy stamp migrated away on re-run
+        assert extra.count("arxiv-marker:") == 1         # exactly one current stamp
         assert "User note: keep me" in extra            # untouched user content preserved
         assert extra.count("arXiv:2106.09685") == 1     # arXiv id not duplicated
 
@@ -89,7 +90,7 @@ class TestExtraIdempotency:
         # Crossref) must NOT be deleted — only our own SemanticScholar line is rewritten.
         prior = ("arXiv:2106.09685 [cs]\n"
                  "Citations: 99 (Crossref) [2025-01-01]\n"
-                 "zotero-marker: resolved 2025-01-01")
+                 "arxiv-marker: resolved 2025-01-01")
         res = make_resolution(kind="conference", canonical="ICLR",
                               venue_raw="International Conference on Learning Representations",
                               citation_count=100)
@@ -97,7 +98,7 @@ class TestExtraIdempotency:
         extra = fields["extra"]
         assert "Citations: 99 (Crossref) [2025-01-01]" in extra      # preserved
         assert "Citations: 100 (SemanticScholar)" in extra           # ours added
-        assert extra.count("zotero-marker:") == 1                    # our stamp not duplicated
+        assert extra.count("arxiv-marker:") == 1                    # our stamp not duplicated
 
 
 class TestFullName:
@@ -126,3 +127,30 @@ class TestBuildSkips:
     def test_accepted_but_no_canonical_returns_empty(self, make_resolution):
         res = make_resolution(acceptance="accepted", canonical=None)
         assert proposal.build(res, None, None, {}) == (None, {})
+
+
+class TestBuildIdempotent:
+    """Once an item IS the target type with its venue field written, re-resolving must
+    propose nothing — otherwise a resolved paper is re-listed forever (the stale-cache bug)."""
+
+    def test_already_converted_returns_empty(self, make_resolution, make_hit):
+        res = make_resolution(kind="conference", canonical="ICLR",
+                              venue_raw="International Conference on Learning Representations")
+        data = {"itemType": "conferencePaper",
+                "proceedingsTitle": "International Conference on Learning Representations",
+                "extra": "arXiv:2106.09685"}
+        assert proposal.build(res, make_hit(), "2106.09685", data) == (None, {})
+
+    def test_still_preprint_proposes_change(self, make_resolution, make_hit):
+        res = make_resolution(kind="conference", canonical="ICLR",
+                              venue_raw="International Conference on Learning Representations")
+        itype, fields = proposal.build(res, make_hit(), "2106.09685", {"itemType": "preprint"})
+        assert itype == "conferencePaper" and fields["proceedingsTitle"]
+
+    def test_right_type_but_venue_missing_still_proposes(self, make_resolution, make_hit):
+        # user flipped the type by hand but never filled the venue field -> still write it
+        res = make_resolution(kind="conference", canonical="ICLR",
+                              venue_raw="International Conference on Learning Representations")
+        data = {"itemType": "conferencePaper", "proceedingsTitle": ""}
+        itype, fields = proposal.build(res, make_hit(), "2106.09685", data)
+        assert itype == "conferencePaper" and fields["proceedingsTitle"]

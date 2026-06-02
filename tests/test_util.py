@@ -1,4 +1,4 @@
-from zotero_marker import util
+from arxiv_marker import util
 
 
 class TestExtractArxivId:

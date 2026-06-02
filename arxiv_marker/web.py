@@ -26,6 +26,13 @@ def _load_records() -> list[dict]:
     return []
 
 
+def _save_records(records: list[dict]) -> None:
+    """Persist the cache back — same shape/format as report.write_reports' JSON, so a
+    later browser refresh (which re-reads this file) sees the applied changes."""
+    p = config.OUT_DIR / "resolutions.json"
+    p.write_text(json.dumps(records, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 def create_app():
     """Build the FastAPI app. Imports fastapi lazily so the core CLI needs no web deps."""
     try:
@@ -37,7 +44,7 @@ def create_app():
             "The web UI needs the 'web' extra. Install it with:  uv sync --extra web"
         ) from e
 
-    app = FastAPI(title="zotero-marker", docs_url=None, redoc_url=None)
+    app = FastAPI(title="arxiv-marker", docs_url=None, redoc_url=None)
 
     class WriteReq(BaseModel):
         keys: list[str]
@@ -74,9 +81,11 @@ def create_app():
         """Apply the proposed field changes for the picked keys (the only mutating call)."""
         if not config.ZOTERO_API_KEY:
             raise HTTPException(400, "Writing needs ZOTERO_API_KEY in .env (the local API is read-only).")
-        records = {r["item_key"]: r for r in _load_records()}
+        cache = _load_records()
+        records = {r["item_key"]: r for r in cache}
         zot = ZoteroClient(base=config.ZOTERO_WRITE_BASE, api_key=config.ZOTERO_API_KEY)
         results = []
+        wrote = False
         for key in req.keys:
             r = records.get(key)
             if not r or not r.get("target_item_type") or not r.get("fields"):
@@ -87,11 +96,23 @@ def create_app():
                 continue
             try:
                 # guard on the resolve-time version (see the CLI note); 412 if it changed
-                zot.apply_changes(key, int(r.get("version") or 0), r["target_item_type"], r["fields"])
+                resp = zot.apply_changes(key, int(r.get("version") or 0), r["target_item_type"], r["fields"])
+                # Mark the cached row as applied so a browser refresh (which re-reads this
+                # file) doesn't resurrect it as an unwritten preprint. The item now IS the
+                # target type: clear the proposal and advance to the new server version
+                # (Zotero returns it in Last-Modified-Version on a successful PATCH).
+                new_v = int((getattr(resp, "headers", {}) or {}).get("Last-Modified-Version") or 0)
+                r["current_item_type"] = r["target_item_type"]
+                r["version"] = new_v or int(r.get("version") or 0)
+                r["target_item_type"] = None
+                r["fields"] = {}
+                wrote = True
                 results.append({"key": key, "ok": True, "venue": r.get("canonical")})
             except Exception as e:  # noqa: BLE001 - report per-item, never abort the batch
                 msg = "item changed since resolve — re-resolve" if "412" in str(e) else str(e)
                 results.append({"key": key, "ok": False, "error": msg})
+        if wrote:  # persist so the applied changes survive a page refresh
+            _save_records(cache)
         return {"results": results}
 
     return app
@@ -100,7 +121,7 @@ def create_app():
 def main(host: str = "127.0.0.1", port: int = 8000) -> None:
     import uvicorn
 
-    print(f"zotero-marker web UI → http://{host}:{port}  (Ctrl+C to stop)")
+    print(f"arxiv-marker web UI → http://{host}:{port}  (Ctrl+C to stop)")
     uvicorn.run(create_app(), host=host, port=port, log_level="warning")
 
 
@@ -430,11 +451,11 @@ syncHead();load();
 """
 
 _PAGE = ("""<!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>zotero-marker</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>arxiv-marker</title>
 __FONTS__<style>__CSS__</style></head><body>
 <header>
   <div class="brand-row">
-    <div class="brand" aria-label="zotero-marker">zotero<span class="dot">·</span><span class="m">marker<span class="swipe"></span></span></div>
+    <div class="brand" aria-label="arxiv-marker">arxiv<span class="dot">·</span><span class="m">marker<span class="swipe"></span></span></div>
     <div class="tagline">arXiv → venue · CORE tier · citations — <b>review, then mark your library</b></div>
   </div>
   <div class="stats" id="stats"></div>

@@ -580,7 +580,7 @@ wheels = [
 ]
 
 [[package]]
-name = "zotero-marker"
+name = "arxiv-marker"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

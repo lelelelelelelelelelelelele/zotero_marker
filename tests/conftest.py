@@ -3,14 +3,14 @@ from __future__ import annotations
 
 import pytest
 
-from zotero_marker.pipeline import Resolution
-from zotero_marker.resolvers import VenueHit
+from arxiv_marker.pipeline import Resolution
+from arxiv_marker.resolvers import VenueHit
 
 
 @pytest.fixture(autouse=True)
 def _isolate_overrides(monkeypatch):
     """Don't let the real data/overrides.csv influence tests; a test can set its own."""
-    monkeypatch.setattr("zotero_marker.pipeline.overrides.get", lambda aid: None)
+    monkeypatch.setattr("arxiv_marker.pipeline.overrides.get", lambda aid: None)
 
 
 @pytest.fixture

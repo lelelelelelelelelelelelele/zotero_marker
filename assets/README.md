@@ -34,8 +34,3 @@ To regenerate after editing the script:
 python out/build_demo.py en   # -> assets/demo.gif
 python out/build_demo.py zh   # -> assets/demo_zh.gif
 ```
-
-**Optional upgrade:** for the launch you can replace `demo.gif` with a true screen
-recording of real Zotero (the blank→lit contrast in the actual UI is the strongest
-version). Follow [`../docs/DEMO_SCRIPT.md`](../docs/DEMO_SCRIPT.md) and overwrite
-`demo.gif`. Keep it < 5 MB (12–15 fps, ~900 px wide); ScreenToGif handles this on export.

@@ -1,4 +1,4 @@
-from zotero_marker import rankings
+from arxiv_marker import rankings
 
 
 def test_exact_alias():

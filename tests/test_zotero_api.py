@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import requests
 
-from zotero_marker.zotero_api import ZoteroClient
+from arxiv_marker.zotero_api import ZoteroClient
 
 
 def _client():

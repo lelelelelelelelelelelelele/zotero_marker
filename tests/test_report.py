@@ -1,4 +1,4 @@
-from zotero_marker import report
+from arxiv_marker import report
 
 
 def test_write_reports_creates_all_three(tmp_path, make_resolution):

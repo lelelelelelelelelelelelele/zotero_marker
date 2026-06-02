@@ -1,6 +1,6 @@
 """Reports: CSV (eyeball), JSON (consumed by `write`), and a self-contained HTML console.
 
-The HTML console shares the live web UI's "Highlighter Desk" look (zotero_marker/web.py)
+The HTML console shares the live web UI's "Highlighter Desk" look (arxiv_marker/web.py)
 but stays fully self-contained — no font CDN, no network — so it works offline as a file.
 """
 from __future__ import annotations
@@ -297,11 +297,11 @@ def _render_html(results: list[Resolution]) -> str:
             '<th>证据</th></tr>')
 
     return f"""<!doctype html><html lang="zh"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>zotero-marker · 写回审核台</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>arxiv-marker · 写回审核台</title>
 <style>{_CSS}</style></head><body>
 <header>
   <div class="brand-row">
-    <div class="brand">zotero<span class="dot">·</span><span class="m">marker<span class="swipe"></span></span><span class="sep">写回审核台</span></div>
+    <div class="brand">arxiv<span class="dot">·</span><span class="m">marker<span class="swipe"></span></span><span class="sep">写回审核台</span></div>
     <div class="tagline">{len(results)} 条 · 已解析 {len(accepted)}(CORE A* {a_star}) · unknown {len(results) - len(accepted)} ·
       <b>dry-run,勾选后复制 keys 写入</b></div>
   </div>

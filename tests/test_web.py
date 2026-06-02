@@ -6,7 +6,7 @@ pytest.importorskip("fastapi")
 
 from fastapi.testclient import TestClient  # noqa: E402
 
-from zotero_marker import web  # noqa: E402
+from arxiv_marker import web  # noqa: E402
 
 _RECORDS = [
     {"item_key": "K1", "title": "Paper One", "target_item_type": "conferencePaper",
@@ -34,7 +34,7 @@ def client(tmp_path, monkeypatch):
 def test_index_serves_html(client):
     r = client.get("/")
     assert r.status_code == 200
-    assert "zotero-marker" in r.text
+    assert "arxiv-marker" in r.text
     assert "Write selected" in r.text
 
 
@@ -70,3 +70,29 @@ def test_write_applies_only_eligible(client, monkeypatch):
     assert res["K1"]["ok"] is True
     assert res["K2"]["ok"] is False and "threshold" in res["K2"]["error"]
     assert res["K3"]["ok"] is False                      # no target_item_type
+
+
+def test_write_persists_applied_change_to_cache(client, monkeypatch):
+    """Regression: after a successful write, a page refresh (re-read of the cache file)
+    must NOT resurrect the row as an unwritten preprint."""
+    monkeypatch.setattr(web.config, "ZOTERO_API_KEY", "KEY")
+
+    class _Resp:
+        headers = {"Last-Modified-Version": "777"}
+
+    class _FakeZot:
+        def __init__(self, *a, **k):
+            pass
+
+        def apply_changes(self, key, version, itype, fields):
+            return _Resp()
+
+    monkeypatch.setattr(web, "ZoteroClient", _FakeZot)
+    assert client.post("/api/write", json={"keys": ["K1"]}).status_code == 200
+
+    recs = {r["item_key"]: r for r in client.get("/api/resolutions").json()}
+    assert recs["K1"]["target_item_type"] is None        # proposal cleared
+    assert recs["K1"]["fields"] == {}
+    assert recs["K1"]["current_item_type"] == "conferencePaper"   # now matches Zotero
+    assert recs["K1"]["version"] == 777                  # advanced to the new server version
+    assert recs["K2"]["target_item_type"] == "conferencePaper"    # untouched rows stay pending

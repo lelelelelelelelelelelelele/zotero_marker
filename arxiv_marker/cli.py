@@ -157,7 +157,7 @@ def cmd_web(args) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="zotero-marker",
+    p = argparse.ArgumentParser(prog="arxiv-marker",
                                 description="Resolve arXiv preprints to venue + tier + citations.")
     p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)

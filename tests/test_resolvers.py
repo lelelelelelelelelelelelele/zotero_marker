@@ -1,7 +1,7 @@
 import pytest
 
-from zotero_marker import resolvers
-from zotero_marker.resolvers import DBLP, SemanticScholar, _is_nonvenue
+from arxiv_marker import resolvers
+from arxiv_marker.resolvers import DBLP, SemanticScholar, _is_nonvenue
 
 
 class TestIsNonvenue:

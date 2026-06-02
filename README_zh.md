@@ -1,4 +1,4 @@
-# zotero-marker
+# arxiv-marker
 
 ![python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![license](https://img.shields.io/badge/license-MIT-green)
@@ -7,11 +7,11 @@
 
 [English](README.md) | [中文](README_zh.md)
 
-![zotero-marker：写入前 → 审核台 → 写入后](assets/zotero-story-zh.webp)
+![arxiv-marker：写入前 → 审核台 → 写入后](assets/zotero-story-zh.webp)
 
 把 Zotero 里那些 arXiv `preprint` 条目的**真实发表 venue** 找出来，并写回成规范元数据。这样 [easyScholar](https://www.easyscholar.cc/)、[zotero-style](https://github.com/MuiseDestiny/zotero-style) / Ethereal Style 这类影响因子 / 分区 / CCF 插件，以及 [Citation Tally](https://github.com/daeh/zotero-citation-tally) 这类引用数列，就能像处理正式论文一样正常显示。
 
-Zotero 的 `preprint` 类型没有 venue 字段，所以这些插件读不到任何会议或期刊信息。它们读取的是 **venue 字段**：期刊用 `publicationTitle`，会议用 `proceedingsTitle` / `conferenceName`，easyScholar 再按 venue 名称 + DOI 去匹配；它们**不会读取 tags**。因此 zotero-marker 会转换 `itemType`，填写 venue 和标识符，同时把 arXiv id 与引用数保留在 `Extra`。
+Zotero 的 `preprint` 类型没有 venue 字段，所以这些插件读不到任何会议或期刊信息。它们读取的是 **venue 字段**：期刊用 `publicationTitle`，会议用 `proceedingsTitle` / `conferenceName`，easyScholar 再按 venue 名称 + DOI 去匹配；它们**不会读取 tags**。因此 arxiv-marker 会转换 `itemType`，填写 venue 和标识符，同时把 arXiv id 与引用数保留在 `Extra`。
 
 它的策略是 **deterministic-first**：优先用 Semantic Scholar（按 arXiv id 查询）和 DBLP 免费解析 venue，尽量做到零幻觉。难以确认的条目会留给你审核，而不是硬猜。
 
@@ -76,7 +76,7 @@ uv run python run.py web        # 启动 http://127.0.0.1:8000
 
 ## 写回哪些字段，以及如何和插件集成
 
-zotero-marker 不替代 [easyScholar](https://www.easyscholar.cc/)、
+arxiv-marker 不替代 [easyScholar](https://www.easyscholar.cc/)、
 [zotero-style](https://github.com/MuiseDestiny/zotero-style) 或
 [Citation Tally](https://github.com/daeh/zotero-citation-tally)，也不隶属于这些项目；
 它做的是把这些插件本来就会读取的 Zotero 字段补齐。
@@ -139,7 +139,7 @@ zotero-marker 不替代 [easyScholar](https://www.easyscholar.cc/)、
 免费。DBLP 免费且无需 key；Zotero local + Web API 免费；Semantic Scholar key 可选，只用于提高限额。运行时依赖只有一个：`requests`。
 
 **DBLP 是什么，为什么要和 Semantic Scholar 一起用？**
-[DBLP](https://dblp.org) 是免费开放的计算机科学文献数据库，由 Schloss Dagstuhl 维护。它对 CS **会议** 覆盖非常好，而会议正是 Crossref 和 Semantic Scholar 相对薄弱的地方。zotero-marker 把它作为 fallback：当 S2 没有返回 venue，或返回了后来的期刊再版时，DBLP 可以通过标题 + 作者 + 年份找回原始会议。
+[DBLP](https://dblp.org) 是免费开放的计算机科学文献数据库，由 Schloss Dagstuhl 维护。它对 CS **会议** 覆盖非常好，而会议正是 Crossref 和 Semantic Scholar 相对薄弱的地方。arxiv-marker 把它作为 fallback：当 S2 没有返回 venue，或返回了后来的期刊再版时，DBLP 可以通过标题 + 作者 + 年份找回原始会议。
 
 **只支持 arXiv 论文吗？**
 工具只处理 Zotero `preprint` 条目，你已经整理好的正式出版条目不会被碰。arXiv 预印本能拿到完整结果（venue **和**引用数）。没有 arXiv id 的 preprint 仍可能通过 DBLP 标题搜索找到 venue，但不会有引用数（引用数来自 Semantic Scholar，并按 arXiv id 查询）。
@@ -179,7 +179,7 @@ CI（GitHub Actions）会在 Python 3.10–3.13 上运行 ruff + pytest。参见
 ```text
 run.py                      入口：python run.py resolve|write|web
 pyproject.toml              uv 项目配置 + ruff/pytest 配置
-zotero_marker/
+arxiv_marker/
   config.py                 .env 加载与配置
   util.py                   arXiv id 提取 + 标题匹配
   resolvers.py              Semantic Scholar（按 arXiv id batch）+ DBLP 解析器

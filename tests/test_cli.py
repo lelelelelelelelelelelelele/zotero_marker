@@ -3,14 +3,14 @@ import json
 
 import pytest
 
-from zotero_marker import cli
+from arxiv_marker import cli
 
 
 def test_version_flag(capsys):
     with pytest.raises(SystemExit) as exc:
         cli.build_parser().parse_args(["--version"])
     assert exc.value.code == 0
-    assert "zotero-marker" in capsys.readouterr().out
+    assert "arxiv-marker" in capsys.readouterr().out
 
 
 def test_parser_resolve_defaults():
