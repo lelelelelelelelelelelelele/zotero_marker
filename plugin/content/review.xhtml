@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns:html="http://www.w3.org/1999/xhtml"
+  title="arxiv-marker"
+  width="960"
+  height="640"
+  persist="width height screenX screenY"
+  onload="zmReviewLoad()"
+>
+  <html:link rel="stylesheet" href="chrome://global/skin/global.css" />
+  <script src="chrome://zoteromarker/content/scripts/review.js" />
+
+  <vbox flex="1" style="padding: 12px; min-height: 0;">
+    <description id="zm-head" style="margin-bottom: 8px; font-weight: bold;" />
+    <html:div
+      id="zm-table-wrap"
+      style="flex: 1 1 auto; min-height: 0; overflow: auto; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px;"
+    >
+      <html:table id="zm-table" style="width: 100%; border-collapse: collapse; font-size: 12px;" />
+    </html:div>
+    <hbox align="center" style="margin-top: 10px;">
+      <button id="zm-all" />
+      <button id="zm-none" />
+      <spacer flex="1" />
+      <label id="zm-count" style="margin-right: 12px; opacity: 0.8;" />
+      <button id="zm-cancel" />
+      <button id="zm-write" default="true" style="font-weight: bold;" />
+    </hbox>
+  </vbox>
+</window>

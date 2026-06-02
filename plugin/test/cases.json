@@ -1,0 +1,44 @@
+[
+  {
+    "key": "ATTN",
+    "title": "Attention Is All You Need",
+    "archiveID": "arXiv:1706.03762",
+    "date": "2017",
+    "creators": [{ "creatorType": "author", "lastName": "Vaswani" }]
+  },
+  {
+    "key": "GAN",
+    "title": "Generative Adversarial Nets",
+    "archiveID": "arXiv:1406.2661",
+    "date": "2014",
+    "creators": [{ "creatorType": "author", "lastName": "Goodfellow" }]
+  },
+  {
+    "key": "VIT",
+    "title": "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale",
+    "archiveID": "arXiv:2010.11929",
+    "date": "2020",
+    "creators": [{ "creatorType": "author", "lastName": "Dosovitskiy" }]
+  },
+  {
+    "key": "RESNET",
+    "title": "Deep Residual Learning for Image Recognition",
+    "archiveID": "arXiv:1512.03385",
+    "date": "2015",
+    "creators": [{ "creatorType": "author", "lastName": "He" }]
+  },
+  {
+    "key": "LORA",
+    "title": "LoRA: Low-Rank Adaptation of Large Language Models",
+    "archiveID": "arXiv:2106.09685",
+    "date": "2021",
+    "creators": [{ "creatorType": "author", "lastName": "Hu" }]
+  },
+  {
+    "key": "BERT",
+    "title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+    "archiveID": "arXiv:1810.04805",
+    "date": "2018",
+    "creators": [{ "creatorType": "author", "lastName": "Devlin" }]
+  }
+]

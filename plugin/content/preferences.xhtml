@@ -1,0 +1,37 @@
+<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+      xmlns:html="http://www.w3.org/1999/xhtml"
+      onload="Zotero.ZoteroMarker.hooks.onPrefsLoad({ window })">
+  <groupbox>
+    <label value="arxiv-marker" style="font-weight: bold; margin: 8px 0 4px 6px;" />
+
+    <html:div style="padding: 4px 8px;">
+      <description style="margin: 4px 0;">
+        Semantic Scholar API key (optional) - leave blank to use the free public endpoint.
+        Only needed if you resolve large batches and hit rate limits.
+      </description>
+      <hbox align="center" style="margin: 4px 0 10px 0;">
+        <label value="S2 API key:" style="min-width: 90px;" />
+        <html:input type="text" id="zm-pref-s2key"
+                    style="flex: 1; min-width: 280px; padding: 4px;"
+                    placeholder="(blank = public endpoint)" />
+      </hbox>
+
+      <description style="margin: 4px 0;">
+        Auto-select items at or above this resolver confidence in the review dialog.
+        Lower-confidence rows are still shown - just left unchecked for you to opt in.
+      </description>
+      <hbox align="center" style="margin: 4px 0;">
+        <label value="Auto-select min" style="min-width: 90px;" />
+        <menulist id="zm-pref-minconf">
+          <menupopup>
+            <menuitem label="0.60  (include unrecognized venue strings)" value="0.6" />
+            <menuitem label="0.70" value="0.7" />
+            <menuitem label="0.80  (recommended)" value="0.8" />
+            <menuitem label="0.85  (single trusted source)" value="0.85" />
+            <menuitem label="0.95  (two sources agree)" value="0.95" />
+          </menupopup>
+        </menulist>
+      </hbox>
+    </html:div>
+  </groupbox>
+</vbox>

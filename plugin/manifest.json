@@ -1,0 +1,16 @@
+{
+  "manifest_version": 2,
+  "name": "arxiv-marker",
+  "version": "0.1.0",
+  "description": "Resolve arXiv preprints to their real CS/ML venue (conference/journal) and CCF/CORE tier, then write the venue field back to the local library - so easyScholar / zotero-style light up. Deterministic: Semantic Scholar + DBLP, no LLM guessing.",
+  "author": "lele",
+  "homepage_url": "https://github.com/lelelelelelelelelelelelele/arxiv-marker",
+  "applications": {
+    "zotero": {
+      "id": "arxiv-marker@lele.dev",
+      "update_url": "https://github.com/lelelelelelelelelelelelele/arxiv-marker/releases/download/release/update.json",
+      "strict_min_version": "6.999",
+      "strict_max_version": "10.99.99"
+    }
+  }
+}

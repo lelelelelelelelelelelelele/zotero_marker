@@ -1,0 +1,3 @@
+# build artifacts (the packaged .xpi is attached to GitHub releases, not committed)
+build/
+node_modules/
