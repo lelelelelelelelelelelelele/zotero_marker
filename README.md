@@ -1,20 +1,22 @@
 # arxiv-marker
 
+![Zotero](https://img.shields.io/badge/Zotero-7%2F9-CC2936)
 ![python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![license](https://img.shields.io/badge/license-MIT-green)
 ![lint](https://img.shields.io/badge/lint-ruff-261230)
-![tests](https://img.shields.io/badge/tests-pytest-0a9edc)
+![tests](https://img.shields.io/badge/tests-pytest%20%2B%20node-0a9edc)
 
 [English](README.md) | [中文](README_zh.md)
 
-![arxiv-marker before, review console, and after](assets/zotero-story.webp)
+![arxiv-marker: blank arXiv preprints → right-click review → venue, CCF tier and citations filled](assets/plugin-story.webp)
 
-Resolve the **real publication venue** of the arXiv preprints sitting in your Zotero
-library, then write it back as proper metadata — so impact-factor / journal-quartile / CCF
-plugins ([easyScholar](https://www.easyscholar.cc/),
+A native **Zotero 7/9 plugin** that resolves the **real publication venue** of the arXiv
+preprints in your library and writes it back as proper metadata — so impact-factor /
+journal-quartile / CCF plugins ([easyScholar](https://www.easyscholar.cc/),
 [zotero-style](https://github.com/MuiseDestiny/zotero-style) / Ethereal Style) and
-citation-count columns
-([Citation Tally](https://github.com/daeh/zotero-citation-tally)) light up natively.
+citation-count columns ([Citation Tally](https://github.com/daeh/zotero-citation-tally))
+light up natively. Select your preprints, **right-click → Resolve venue**, review every
+proposed change, write the ones you want.
 
 A `preprint` in Zotero has no venue field, so those plugins show nothing for it. They read
 the **venue field** (`publicationTitle` for journals; `proceedingsTitle`/`conferenceName`
@@ -24,7 +26,8 @@ id and citation count in `Extra`.
 
 It is deliberately **deterministic-first**: venues are resolved for free via Semantic
 Scholar (keyed on the arXiv id) and DBLP, with ~zero hallucination. Hard cases are left for
-review instead of guessed.
+review instead of guessed. Everything runs **inside Zotero** — no Python, no local server,
+no Web API key.
 
 > **Why not the existing arXiv plugins?** They merge on the *published DOI* the author
 > registered on the arXiv page. NeurIPS / ICLR / older CVPR have **no Crossref DOI** (they
@@ -32,70 +35,34 @@ review instead of guessed.
 > papers. Keying on the **arXiv id → Semantic Scholar** (which dedupes preprint + published
 > into one record) fixes that.
 
-<details>
-<summary>Animated walkthrough</summary>
-
-![demo](assets/demo.gif)
-
-</details>
-
 ## Install
 
-Uses [uv](https://docs.astral.sh/uv/). Clone, then:
+1. Download the latest **`arxiv-marker-<version>.xpi`** from the
+   [Releases page](https://github.com/lelelelelelelelelelelelele/arxiv-marker/releases/latest).
+2. In Zotero: **Tools → Plugins** → the gear/▾ menu → **Install Plugin From File…** → pick
+   the `.xpi`. (Or just drag the `.xpi` onto the Zotero window.)
+3. Restart Zotero if prompted.
 
-```bash
-uv sync                       # creates .venv, installs deps (+ dev tools)
-cp .env.example .env          # then edit (see below)
-```
+Requirements: **Zotero 7 or later** (works on the Zotero 9 betas too). No Python, no local
+server, no API key. A **Semantic Scholar API key** is optional — add it in the plugin
+preferences (**Tools → Plugins → arxiv-marker → Preferences**) to lift rate limits on large
+libraries; without it the plugin still works against the public endpoint.
 
-- **Zotero 7+ desktop must be running** — the tool talks to its local API at
-  `localhost:23119`. Set `ZOTERO_LIBRARY_ID` in `.env` to your user/library id.
-- A **Semantic Scholar API key** is optional but recommended (removes 429 rate limits):
-  get one at <https://www.semanticscholar.org/product/api> and set `S2_API_KEY=...`.
-- Writing back uses the **Zotero Web API** (the local API is read-only), so it needs a
-  `ZOTERO_API_KEY` with write scope — create one at
-  <https://www.zotero.org/settings/keys>.
+## Use
 
-## Use — CLI
+1. Select one or more arXiv preprints in your library.
+2. **Right-click → Resolve venue with arxiv-marker** (also available under the **Tools** menu).
+3. A **review dialog** lists every item with its resolved venue, CCF/CORE tier, citation
+   count, and the exact fields that will be written. Rows at/above your confidence threshold
+   are pre-checked; lower-confidence rows are shown but **left unchecked** — the plugin
+   abstains rather than guess.
+4. **Write selected** flips the item type (`preprint` → `conferencePaper` / `journalArticle`)
+   and fills the venue + identifiers in place. Re-running on already-resolved items proposes
+   nothing (idempotent).
 
-**1. Resolve (dry-run, writes nothing to Zotero):**
-
-```bash
-uv run python run.py resolve                 # all preprints in the library
-uv run python run.py resolve --limit 12      # first 12
-uv run python run.py resolve --items GD5PM7VD,BW3RIHJ2   # specific items
-```
-
-This produces `out/resolutions.csv`, `out/resolutions.json`, and **`out/resolutions.html`** —
-a self-contained review console: sortable/filterable table of every item, the exact field
-changes that will be written, citations, and evidence links. Tick the rows you want and
-copy the selected item keys.
-
-**2. Write (converts itemType + fills venue fields):**
-
-```bash
-uv run python run.py write                              # dry-run: prints every proposed change
-uv run python run.py write --items GD5PM7VD,2I966U5R --yes   # write only the keys you picked
-uv run python run.py write --threshold 0.9 --yes        # write everything above a confidence bar
-```
-
-Only items with a resolved venue and `confidence >= threshold` are written; `unknown` items
-are never touched.
-
-## Use — web UI (optional)
-
-A browser front-end over the same pipeline (review → tick → write, no terminal):
-
-```bash
-uv sync --extra web
-uv run python run.py web        # serves http://127.0.0.1:8000
-```
-
-Bound to `127.0.0.1` only; the write action needs `ZOTERO_API_KEY` and an explicit confirm.
-
-![web review console](assets/zotero-review.webp)
-
-*Filter by Zotero collection, see the exact fields each row will write, then tick and write. Low-confidence rows (e.g. the 0.60 workshop matches) are left unchecked — the tool abstains rather than guess.*
+> 60-second smoke test: select *Attention Is All You Need* and *LoRA*, right-click →
+> Resolve venue, and you should see `NeurIPS / A*` and `ICLR / A*` with the type change and
+> fields to write.
 
 ## What gets written, and how plugins integrate
 
@@ -128,16 +95,10 @@ Those fields then plug into the existing ecosystem:
   always match the exact strings easyScholar uses. This project uses `write_as` in
   `data/venue_rankings.csv` for common top venues, but it is not a complete knowledge base;
   long-tail venues may need an added mapping or a manual `data/overrides.csv` entry.
-- **Citation counts are snapshots** — the tool writes the Semantic Scholar citation count
-  seen during resolution into `Extra`, but there is no `refresh` mode yet for already-written
-  items, so the count is not live.
-- **Write-back needs external API keys** — the project itself is open source and free; DBLP
-  and the Zotero local API need no key. Writing to Zotero requires a write-scoped
-  `ZOTERO_API_KEY`, and heavier Semantic Scholar usage should set `S2_API_KEY` to avoid rate
-  limits.
-- **It is not a native Zotero plugin** — today it is a CLI / local web UI, so it has one more
-  step than a right-click plugin. The upside is that the resolver is less exposed to Zotero
-  plugin API churn.
+- **Citation counts are snapshots** — the plugin writes the Semantic Scholar citation count
+  seen during resolution into `Extra`; there is no live refresh of already-written items yet.
+- **CS/ML-focused** — arXiv + conference-as-venue + CCF/CORE are CS-specific. Other fields
+  resolve venues less reliably.
 
 ## How confidence is computed
 
@@ -150,8 +111,8 @@ Rule-based, **not** an LLM's self-reported number:
 | 0.60 | a venue string was found, but it's not in the ranking table | ✗ |
 | 0.00 | no venue found → `acceptance=unknown` | ✗ |
 
-`write` only applies items at or above `--threshold` (default `0.85`). Lower it
-(`--threshold 0.6`) to include shakier matches, or raise it to be stricter.
+The review dialog pre-checks items at/above the confidence threshold (default `0.85`,
+adjustable in preferences). Lower it to include shakier matches, or raise it to be stricter.
 
 ## Ranking table & overrides
 
@@ -159,17 +120,54 @@ Rule-based, **not** an LLM's self-reported number:
 freely. `data/overrides.csv` (optional, keyed by arXiv id) is the escape hatch for the long
 tail the auto-resolver gets "technically right but not what you want" (e.g. a paper whose
 record points at a later journal republication instead of the original conference). Overrides
-always win and are labelled `source=override` in the report.
+always win and are labelled `source=override` in the report. After editing either CSV, run
+`node plugin/tools/gen-data.mjs` to regenerate the plugin's embedded tables.
 
 > Rankings disagree below the top tier and lag reality by years — treat any single tier as
 > "source X says Y", not ground truth.
 
+## Advanced — CLI & local web UI
+
+The same deterministic resolver also ships as a Python CLI (and an optional local web UI),
+for batch processing, scripting, or running headless. The plugin is a faithful port of this
+resolver — the two are kept in lock-step by a [parity test](plugin/test/parity.mjs) that runs
+both against live Semantic Scholar / DBLP.
+
+Uses [uv](https://docs.astral.sh/uv/). Clone, then:
+
+```bash
+uv sync                       # creates .venv, installs deps (+ dev tools)
+cp .env.example .env          # then edit (see below)
+```
+
+- **Zotero 7+ desktop must be running** — the CLI talks to its local API at
+  `localhost:23119`. Set `ZOTERO_LIBRARY_ID` in `.env` to your user/library id.
+- A **Semantic Scholar API key** is optional but recommended (removes 429 rate limits):
+  get one at <https://www.semanticscholar.org/product/api> and set `S2_API_KEY=...`.
+- Writing back from the CLI uses the **Zotero Web API** (the local API is read-only), so it
+  needs a `ZOTERO_API_KEY` with write scope — create one at
+  <https://www.zotero.org/settings/keys>. (The *plugin* writes locally and needs no such key.)
+
+```bash
+uv run python run.py resolve                 # dry-run: all preprints → out/resolutions.{csv,json,html}
+uv run python run.py resolve --items GD5PM7VD,BW3RIHJ2   # specific items
+uv run python run.py write --items GD5PM7VD,2I966U5R --yes   # write only the keys you picked
+uv run python run.py write --threshold 0.9 --yes        # write everything above a confidence bar
+
+uv sync --extra web
+uv run python run.py web        # browser front-end at http://127.0.0.1:8000 (bound to localhost)
+```
+
+`out/resolutions.html` is a self-contained review console (sortable/filterable, exact field
+changes, evidence links); the `web` UI is the same pipeline with a tick-and-write front-end.
+Only items with a resolved venue and `confidence >= threshold` are written; `unknown` items
+are never touched.
+
 ## FAQ
 
 **Is it free?**
-Yes. DBLP is free and needs no key; the Zotero local + Web APIs are free; a Semantic
-Scholar key is optional (it only lifts rate limits). The tool has one runtime dependency
-(`requests`).
+Yes. DBLP is free and needs no key; the Zotero APIs are free; a Semantic Scholar key is
+optional (it only lifts rate limits).
 
 **What is DBLP, and why use it alongside Semantic Scholar?**
 [DBLP](https://dblp.org) is a free, open computer-science bibliography (maintained by
@@ -187,13 +185,8 @@ touched. arXiv preprints get the full result (venue **and** citation count). A p
 **Will it create duplicates or clobber my data?**
 No. It never creates items — it edits existing ones in place. The `Extra` rewrite is
 idempotent (it only ever rewrites lines this tool authored, so re-runs don't pile up), and
-each write is guarded by the item's resolve-time version (a 412 aborts rather than
-overwrite your newer edits). Nothing is written until you review and pick it. Separately,
-`resolve` *flags* duplicate arXiv ids already in your library so you can merge them.
-
-**Why does a conference paper show no impact factor?**
-Impact factor is a journal/JCR metric. Conferences are ranked through systems such as CORE
-and CCF, so a blank IF on a conference paper is expected.
+nothing is written until you review and pick it. Separately, the resolver *flags* duplicate
+arXiv ids already in your library so you can merge them.
 
 **Why doesn't my ICLR paper get a CCF tag?**
 CCF added ICLR in its 2026 (7th) edition. If easyScholar has not synced that dataset yet,
@@ -205,17 +198,20 @@ Because citation count and publication venue are separate facts. arXiv-only or w
 papers can be highly cited, but if there is no formal conference/journal publication, there is
 no canonical venue for this tool to write back.
 
-**Why a CLI and not a Zotero plugin?**
-Zotero now ships a major version roughly every 8 weeks, and plugins break on each bump
-(JSM→ESM, bootstrap changes, `strict_max_version`). The resolution logic is far more
-durable as a Python CLI on stable APIs. A thin Zotero plugin that *calls* this resolver is
-a sensible later layer, while the resolver stays decoupled from Zotero's churn.
+**Won't the plugin break on the next Zotero version?**
+Zotero ships a major version roughly every 8 weeks and plugins can break on each bump, so the
+resolution logic deliberately lives in a self-contained module shared with the Python CLI;
+the Zotero-facing glue is thin. If a Zotero update ever breaks the plugin, the CLI keeps
+working against stable APIs while the plugin catches up.
 
 ## Development
 
 ```bash
-uv run pytest              # full suite (network is mocked; no Zotero/S2 needed)
+uv run pytest              # Python resolver suite (network mocked; no Zotero/S2 needed)
 uv run ruff check .        # lint
+node plugin/test/unit.mjs  # ported JS resolver — deterministic unit tests
+node plugin/test/parity.mjs   # live JS-vs-Python parity (needs network + the Python pkg)
+powershell -ExecutionPolicy Bypass -File plugin/tools/build-xpi.ps1   # package the .xpi
 ```
 
 CI (GitHub Actions) runs ruff + pytest on Python 3.10–3.13. See
@@ -227,29 +223,30 @@ CI (GitHub Actions) runs ruff + pytest on Python 3.10–3.13. See
   written.
 - **Harder venue cases** — add reviewable web evidence when Semantic Scholar and DBLP both
   miss.
-- **Zotero plugin entry point** — provide a more native Zotero workflow while reusing the
-  same resolver.
+- **Wider field coverage** — venue resolution beyond CS/ML.
 
 ## Layout
 
 ```
-run.py                      entry point: python run.py resolve|write|web
-pyproject.toml              uv project + ruff/pytest config
-arxiv_marker/
-  config.py                 .env loading + settings
-  util.py                   arXiv-id extraction + title matching
-  resolvers.py              Semantic Scholar (batch by arXiv id) + DBLP resolvers
-  rankings.py               venue string -> canonical + CORE tier
-  overrides.py              manual per-arXiv overrides
-  pipeline.py               resolve cascade, venue choice, confidence, tags, dup detection
+plugin/                     native Zotero 7/9 plugin (the .xpi)
+  manifest.json             bootstrapped plugin manifest
+  bootstrap.js              registers chrome path, loads scripts
+  content/
+    review.xhtml            review/confirm dialog · preferences.xhtml  prefs pane
+    scripts/
+      resolver.js           the deterministic resolver, ported to JS
+      zm-data.js            AUTO-GENERATED venue/override tables (tools/gen-data.mjs)
+      arxiv-marker.js       Zotero glue (menu, item I/O, write-back)
+      review.js             review dialog logic
+  tools/  gen-data.mjs · build-xpi.ps1        test/  unit.mjs · parity.mjs
+
+run.py                      CLI entry point: python run.py resolve|write|web
+arxiv_marker/               the Python resolver + CLI (shared logic the plugin is ported from)
+  resolvers.py · rankings.py · overrides.py · pipeline.py   resolve cascade + confidence
   proposal.py               itemType + field write-back (idempotent Extra)
-  report.py                 CSV + JSON + HTML review console
-  cli.py                    resolve / write / web commands
-  web.py                    optional FastAPI web UI (the `web` extra)
-  zotero_api.py             local (read) + web (write) Zotero client
+  report.py · cli.py · web.py · zotero_api.py
 data/
-  venue_rankings.csv        editable CORE ranking table
-  overrides.csv             optional manual overrides
+  venue_rankings.csv        editable CORE ranking table · overrides.csv  manual overrides
 tests/                      pytest suite (network mocked)
 ```
 

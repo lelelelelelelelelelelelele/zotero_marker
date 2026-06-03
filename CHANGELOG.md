@@ -6,7 +6,27 @@ All notable changes are documented here. Format based on
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-06-04
+
+### Added
+- **Native Zotero 7/9 plugin** (`arxiv-marker.xpi`): select arXiv preprints, right-click →
+  **Resolve venue**, review every proposed change in a dialog, and write back **directly to
+  the local library** — no Python, no local server, no Web API key. The resolver is a faithful
+  JS port of the Python pipeline, kept in lock-step by a live JS-vs-Python parity test on top
+  of 123 deterministic unit tests.
+- Plugin preferences pane (optional Semantic Scholar key, confidence threshold), bilingual
+  (English / 中文).
+
+### Changed
+- **Renamed the project `zotero-marker` → `arxiv-marker`** — a tool name may not contain
+  "Zotero" under the [Zotero trademark policy](https://www.zotero.org/support/terms/trademark).
+  The Python import package is now `arxiv_marker`; write-back stamps `arxiv-marker: resolved
+  <date>`. The idempotent `Extra` rewrite still recognizes the old `zotero-marker:` line and
+  migrates it in place, so re-running on previously-marked items does not duplicate.
+
 ### Fixed
+- The plugin now recognizes already-resolved items and proposes nothing for them on re-run
+  (idempotent), and its preferences pane is bilingual.
 - ICCV items got no easyScholar CCF tag. Semantic Scholar returns the venue as
   `IEEE International Conference on Computer Vision`, but easyScholar's ICCV (CCF A) entry
   has no `IEEE` prefix — so the venue string written didn't match and the tag stayed blank

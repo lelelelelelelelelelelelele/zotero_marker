@@ -1,36 +1,34 @@
 # assets/
 
-Static media referenced by the project README.
+Static media referenced by the project README. The current set are **real screen captures
+of the native Zotero plugin** (no synthetic illustration).
 
-- **`demo.gif`** (English captions) — the before→after demo shown at the top of the README.
-- **`demo_zh.gif`** (Chinese captions) — same animation for the 小红书 / 知乎 posts.
-- **`zotero-before.png`** — a **real** Zotero screenshot: arXiv preprints with the
-  easyScholar 影响因子/期刊标签 and Citation Tally 引用 columns blank. The authenticity
-  ("proof") counterpart to the illustration GIF.
-- **`zotero-review.webp`** — a **real** screenshot of the web review console: resolved
-  venues (ICCV/CVPR/ECCV), citations, CORE tier, the exact **FIELDS TO WRITE**, and the
-  6/8 selection (the two 0.60 workshop/WACV rows correctly unchecked = honest abstention).
-  Embedded in the README "web UI" section, and reused as panel 02 of `zotero-story.webp`.
-  Cropped to content + WebP q90 (~180 KB).
-- **`zotero-after.png`** — the **same** items/columns/window after `write`: 出版物 (venue),
-  期刊标签 (`CCF A`/`CCF B`), and 引用 (citation count) now filled — the blank→filled
-  counterpart to `zotero-before.png` (影响因子 stays blank: conferences have no impact factor).
-- **`zotero-story.webp`** / **`zotero-story-zh.webp`** — the three shots above composited
-  into one **before → review → after** narrative; the README hero. English chrome →
-  `zotero-story.webp` (used by `README.md`), Chinese chrome → `zotero-story-zh.webp` (used
-  by `README_zh.md`). The embedded Zotero screenshots stay in the real (Chinese) UI either
-  way. WebP keeps each ~340 KB at full resolution (vs ~3 MB PNG). Rebuild: open
-  `../out/build_story.html?lang=en` (or `?lang=zh`), screenshot its `#card` at 1280px,
-  save as WebP q90.
+## Current (plugin)
 
-Both are **illustration animations**, built by `../out/build_demo.py` (Pillow) from the
-**real** resolved values in `../out/resolutions.json` (real papers, real venues, real
-Semantic Scholar citation counts — *Attention Is All You Need* 178,362, etc.). They are
-stylised explainers, **not** literal screen captures, and say so in the footer.
+- **`plugin-story.webp`** (EN) / **`plugin-story-zh.webp`** (中文) — the README hero: the
+  three shots below composited into one **before → review → after** narrative, styled to match
+  `social-card.png` (lime accent, dark gradient, flow chips). `README.md` uses the EN one,
+  `README_zh.md` the 中文 one.
+- **`library-before.png`** — a **real** Zotero library: arXiv preprints with the Publication,
+  IF, easyScholar CCF and Citations columns blank (the "proof" before-state).
+- **`library-after.png`** — the **same** items after **Resolve venue → Write selected**:
+  Publication filled, `CCF A` / `CCF B` tags, and citation counts now showing. Two rows stay
+  `preprint` (honest abstention: no recognized venue).
+- **`plugin-review.png`** (EN) / **`plugin-review-zh.png`** (中文) — a **real** shot of the
+  plugin's review dialog: every item, resolved venue + tier + citations, the exact fields to
+  write, and low-confidence rows left unchecked.
+- **`social-card.png`** — 1280×640 GitHub Social-preview card (gitignored; uploaded via repo
+  Settings, not referenced in the README).
 
-To regenerate after editing the script:
+The three input PNGs are literal screenshots taken in Zotero 7. The `plugin-story*` composite
+is an HTML layout, `../out/build_plugin_story.html`: open it in a browser at `?lang=en` (or
+`?lang=zh`), size the viewport to 1200px wide, full-page-screenshot the `#card`, and save as
+WebP. To refresh after re-capturing the screenshots, just drop the new PNGs in here and
+re-render.
 
-```bash
-python out/build_demo.py en   # -> assets/demo.gif
-python out/build_demo.py zh   # -> assets/demo_zh.gif
-```
+> Note: the `library-*` screenshots show Zotero's English column headers. The 中文 story reuses
+> them with Chinese captions + the Chinese review dialog; re-capture the library in a Chinese
+> Zotero UI if a fully-localized hero is wanted.
+
+The legacy CLI/web-era assets (`demo*.gif`, `zotero-story*.webp`, `zotero-review.webp`,
+`zotero-before/after.png`) were removed in the plugin rewrite (2026-06-04).
