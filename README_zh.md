@@ -5,6 +5,7 @@
 ![license](https://img.shields.io/badge/license-MIT-green)
 ![lint](https://img.shields.io/badge/lint-ruff-261230)
 ![tests](https://img.shields.io/badge/tests-pytest%20%2B%20node-0a9edc)
+[![downloads](https://img.shields.io/github/downloads/lelelelelelelelelelelelele/arxiv-marker/total?label=downloads&color=blue)](https://github.com/lelelelelelelelelelelelele/arxiv-marker/releases)
 
 [English](README.md) | [中文](README_zh.md)
 
